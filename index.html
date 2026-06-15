@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Come Back Later</title>
+<meta name="description" content="The site isn't ready. It will never be ready. Please come back later." />
+<meta name="theme-color" content="#0f0f17" />
+<!-- Open Graph / social preview -->
+<meta property="og:title" content="Come Back Later" />
+<meta property="og:description" content="The site isn't ready. It will never be ready. Please come back later." />
+<meta property="og:type" content="website" />
+<style>
+  :root {
+    --bg: #0f0f17;
+    --bg2: #16161f;
+    --fg: #f4f4f8;
+    --muted: #9aa0b4;
+    --accent: #ff5d73;
+    --accent2: #5dc2ff;
+    --ok: #5dffa0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    background: radial-gradient(1200px 800px at 50% -10%, #1d1d2c 0%, var(--bg) 55%);
+    color: var(--fg);
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow-x: hidden;
+    padding: 24px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 620px; width: 100%; position: relative; z-index: 2; }
+  .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: .35em;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 18px;
+  }
+  h1 {
+    font-size: clamp(40px, 11vw, 92px);
+    line-height: 0.95;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    background: linear-gradient(120deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 18px;
+  }
+  .excuse {
+    font-size: clamp(16px, 4.5vw, 21px);
+    color: var(--muted);
+    min-height: 3.2em;
+    margin: 0 auto 28px;
+    max-width: 480px;
+    transition: opacity .25s ease;
+  }
+  .countdown {
+    font-variant-numeric: tabular-nums;
+    font-size: clamp(14px, 4vw, 18px);
+    color: var(--fg);
+    background: var(--bg2);
+    border: 1px solid #262636;
+    border-radius: 14px;
+    padding: 14px 18px;
+    display: inline-block;
+    margin-bottom: 30px;
+  }
+  .countdown b { color: var(--accent2); }
+  .btn-row { position: relative; height: 64px; margin-bottom: 26px; }
+  button {
+    font: inherit;
+    font-weight: 700;
+    font-size: 17px;
+    color: #15151f;
+    background: var(--fg);
+    border: 0;
+    border-radius: 999px;
+    padding: 15px 30px;
+    cursor: pointer;
+    transition: transform .12s ease, background .2s ease, box-shadow .2s ease;
+    box-shadow: 0 8px 30px rgba(0,0,0,.4);
+    white-space: nowrap;
+  }
+  button:hover { background: #fff; }
+  button:active { transform: scale(.96); }
+  #enterBtn { position: absolute; left: 50%; top: 0; transform: translateX(-50%); }
+  #enterBtn.runaway { transition: left .25s cubic-bezier(.34,1.56,.64,1), top .25s cubic-bezier(.34,1.56,.64,1); }
+  .stats {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .stats b { color: var(--fg); }
+  .reward {
+    margin-top: 26px;
+    padding: 20px;
+    border: 1px dashed #3a3a52;
+    border-radius: 16px;
+    background: linear-gradient(180deg, rgba(93,255,160,.06), transparent);
+    display: none;
+  }
+  .reward.show { display: block; animation: pop .4s ease; }
+  .reward h2 { color: var(--ok); font-size: 20px; margin-bottom: 8px; }
+  .reward p { color: var(--muted); font-size: 15px; }
+  .reward code { color: var(--ok); background: #11221a; padding: 2px 8px; border-radius: 6px; }
+  @keyframes pop { from { transform: scale(.8); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+  footer {
+    position: fixed;
+    bottom: 16px;
+    left: 0; right: 0;
+    color: #4a4a60;
+    font-size: 12px;
+    z-index: 2;
+  }
+  footer a { color: #6a6a85; text-decoration: none; }
+  /* floating background emoji */
+  .floaty {
+    position: fixed;
+    z-index: 0;
+    font-size: 28px;
+    opacity: .12;
+    pointer-events: none;
+    animation: drift linear infinite;
+  }
+  @keyframes drift {
+    from { transform: translateY(110vh) rotate(0deg); }
+    to   { transform: translateY(-20vh) rotate(360deg); }
+  }
+  .confetti {
+    position: fixed;
+    top: -10px;
+    width: 10px; height: 14px;
+    z-index: 5;
+    pointer-events: none;
+    will-change: transform;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #enterBtn.runaway { transition: none; }
+    .floaty { animation: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="eyebrow">Status: definitely not ready</div>
+    <h1>Come back later.</h1>
+    <p class="excuse" id="excuse">We're putting the finishing touches on absolutely nothing.</p>
+
+    <div class="countdown" id="countdown">Ready in <b id="cd">…</b></div>
+
+    <div class="btn-row">
+      <button id="enterBtn">Enter the site anyway →</button>
+    </div>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="reward" id="reward">
+      <h2>🏆 Fine. You win.</h2>
+      <p>Your reward for relentless persistence: a coupon for nothing, redeemable never.</p>
+      <p style="margin-top:10px">Code: <code id="rewardCode">PATIENCE-IS-A-VIRTUE</code></p>
+    </div>
+  </div>
+
+  <footer>comebacklater.in — <a id="resetLink" href="#">reset my shame</a></footer>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- persistent state ---------- */
+  var KEY = "cbl-state-v1";
+  var state = { visits: 0, dodges: 0 };
+  try {
+    var saved = JSON.parse(localStorage.getItem(KEY) || "null");
+    if (saved && typeof saved === "object") state = Object.assign(state, saved);
+  } catch (e) {}
+  state.visits += 1;
+  save();
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+  /* ---------- excuses ---------- */
+  var excuses = [
+    "We're putting the finishing touches on absolutely nothing.",
+    "The developers went to get coffee in 2019. Still waiting.",
+    "Our hamster that powers the server is on a lunch break.",
+    "The website is 99% done. It has been 99% done for three years.",
+    "We tried turning it off and on again. It's now more off.",
+    "Loading… loading… okay it's not loading.",
+    "The launch is scheduled for 'soon™'.",
+    "Mercury is in retrograde and so is our deploy pipeline.",
+    "Someone deleted the production database. We're calling it a feature.",
+    "We're waiting for the vibes to be exactly right.",
+    "The intern who knew the password graduated.",
+    "Technically the internet is ready. We are not."
+  ];
+  var excuseEl = document.getElementById("excuse");
+  var ei = 0;
+  function nextExcuse() {
+    excuseEl.style.opacity = "0";
+    setTimeout(function () {
+      ei = (ei + 1 + Math.floor(Math.random() * (excuses.length - 1))) % excuses.length;
+      excuseEl.textContent = excuses[ei];
+      excuseEl.style.opacity = "1";
+    }, 250);
+  }
+  excuseEl.textContent = excuses[0];
+  setInterval(nextExcuse, 4200);
+
+  /* ---------- absurd countdown ---------- */
+  var cd = document.getElementById("cd");
+  // a target that's always comically far away and drifts further
+  var remaining = 9999 * 24 * 3600 + Math.floor(Math.random() * 1e6); // seconds-ish
+  function fmt(n) { return String(n).padStart(2, "0"); }
+  function tickCountdown() {
+    // 30% of the time it goes UP, because of course it does
+    remaining += Math.random() < 0.3 ? 7 : -1;
+    if (remaining < 0) remaining = 9999 * 24 * 3600;
+    var years = Math.floor(remaining / (365 * 24 * 3600));
+    var rem = remaining % (365 * 24 * 3600);
+    var days = Math.floor(rem / (24 * 3600));
+    rem %= 24 * 3600;
+    var h = Math.floor(rem / 3600);
+    rem %= 3600;
+    var m = Math.floor(rem / 60);
+    var s = rem % 60;
+    cd.textContent = years + "y " + days + "d " + fmt(h) + ":" + fmt(m) + ":" + fmt(s);
+  }
+  tickCountdown();
+  setInterval(tickCountdown, 1000);
+
+  /* ---------- runaway button ---------- */
+  var btn = document.getElementById("enterBtn");
+  var row = btn.parentElement;
+  var rewardShown = false;
+
+  function dodge() {
+    state.dodges += 1;
+    save();
+    renderStats();
+    btn.classList.add("runaway");
+    var rowRect = row.getBoundingClientRect();
+    var maxX = Math.max(0, rowRect.width - btn.offsetWidth);
+    var x = Math.random() * maxX;
+    // also let it jump a little vertically within a safe band
+    var y = (Math.random() - 0.5) * 40;
+    btn.style.left = x + "px";
+    btn.style.transform = "translateX(0)";
+    btn.style.top = y + "px";
+
+    if (state.dodges === 5) btn.textContent = "Nope.";
+    else if (state.dodges === 9) btn.textContent = "Still nope.";
+    else if (state.dodges === 14) btn.textContent = "You're persistent…";
+    else if (state.dodges >= 18 && !rewardShown) {
+      btn.textContent = "Okay, okay! Fine.";
+    }
+
+    if (state.dodges >= 20 && !rewardShown) winReward();
+  }
+
+  // dodge on hover (desktop) and on touchstart (mobile)
+  btn.addEventListener("mouseenter", dodge);
+  btn.addEventListener("touchstart", function (e) { e.preventDefault(); dodge(); }, { passive: false });
+  // if they somehow click it, also count + maybe reward
+  btn.addEventListener("click", function () { dodge(); });
+
+  function winReward() {
+    rewardShown = true;
+    var r = document.getElementById("reward");
+    r.classList.add("show");
+    btn.style.display = "none";
+    document.getElementById("countdown").innerHTML = "Ready in <b>just kidding</b>";
+    confettiBurst();
+  }
+
+  /* ---------- stats ---------- */
+  var statsEl = document.getElementById("stats");
+  function renderStats() {
+    var v = state.visits, d = state.dodges;
+    statsEl.innerHTML =
+      "You've come back <b>" + v + "</b> time" + (v === 1 ? "" : "s") + ". Still not ready.<br>" +
+      "The button has dodged you <b>" + d + "</b> time" + (d === 1 ? "" : "s") + ".";
+  }
+  renderStats();
+
+  /* ---------- reset ---------- */
+  document.getElementById("resetLink").addEventListener("click", function (e) {
+    e.preventDefault();
+    state = { visits: 1, dodges: 0 };
+    save();
+    location.reload();
+  });
+
+  /* ---------- floating background emoji ---------- */
+  var floats = ["⏳", "🚧", "🛠️", "☕", "🐌", "💤", "🔌", "📦"];
+  for (var i = 0; i < 8; i++) {
+    (function (i) {
+      var s = document.createElement("div");
+      s.className = "floaty";
+      s.textContent = floats[i % floats.length];
+      s.style.left = (5 + i * 12) + "%";
+      s.style.fontSize = (22 + (i % 4) * 10) + "px";
+      s.style.animationDuration = (16 + (i % 5) * 6) + "s";
+      s.style.animationDelay = "-" + (i * 3) + "s";
+      document.body.appendChild(s);
+    })(i);
+  }
+
+  /* ---------- confetti (no deps) ---------- */
+  function confettiBurst() {
+    var colors = ["#ff5d73", "#5dc2ff", "#5dffa0", "#ffd75d", "#c98bff"];
+    for (var i = 0; i < 80; i++) {
+      (function () {
+        var c = document.createElement("div");
+        c.className = "confetti";
+        c.style.left = Math.random() * 100 + "vw";
+        c.style.background = colors[Math.floor(Math.random() * colors.length)];
+        c.style.transform = "rotate(" + Math.random() * 360 + "deg)";
+        document.body.appendChild(c);
+        var fall = 2000 + Math.random() * 2000;
+        var drift = (Math.random() - 0.5) * 300;
+        var anim = c.animate(
+          [
+            { transform: "translate(0,0) rotate(0deg)", opacity: 1 },
+            { transform: "translate(" + drift + "px, 100vh) rotate(720deg)", opacity: 1 }
+          ],
+          { duration: fall, easing: "ease-in" }
+        );
+        anim.onfinish = function () { c.remove(); };
+      })();
+    }
+  }
+})();
+</script>
+</body>
+</html>
