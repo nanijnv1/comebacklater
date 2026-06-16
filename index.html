@@ -232,24 +232,24 @@
   excuseEl.textContent = excuses[0];
   setInterval(nextExcuse, 4200);
 
-  /* ---------- absurd countdown ---------- */
+  /* ---------- real countdown to 2127-01-01 ---------- */
   var cd = document.getElementById("cd");
-  // a target that's always comically far away and drifts further
-  var remaining = 9999 * 24 * 3600 + Math.floor(Math.random() * 1e6); // seconds-ish
+  var RELEASE = new Date(2127, 0, 1, 0, 0, 0); // Jan 1, 2127, local time
   function fmt(n) { return String(n).padStart(2, "0"); }
   function tickCountdown() {
-    // 30% of the time it goes UP, because of course it does
-    remaining += Math.random() < 0.3 ? 7 : -1;
-    if (remaining < 0) remaining = 9999 * 24 * 3600;
-    var years = Math.floor(remaining / (365 * 24 * 3600));
-    var rem = remaining % (365 * 24 * 3600);
+    var totalSec = Math.floor((RELEASE.getTime() - Date.now()) / 1000);
+    if (totalSec <= 0) { cd.textContent = "it's ready?! (impossible)"; return; }
+    var years = Math.floor(totalSec / (365 * 24 * 3600));
+    var rem = totalSec % (365 * 24 * 3600);
     var days = Math.floor(rem / (24 * 3600));
     rem %= 24 * 3600;
     var h = Math.floor(rem / 3600);
     rem %= 3600;
     var m = Math.floor(rem / 60);
     var s = rem % 60;
-    cd.textContent = years + "y " + days + "d " + fmt(h) + ":" + fmt(m) + ":" + fmt(s);
+    cd.textContent =
+      years + "y " + days + "d " + fmt(h) + ":" + fmt(m) + ":" + fmt(s) +
+      "  (" + totalSec.toLocaleString() + " seconds)";
   }
   tickCountdown();
   setInterval(tickCountdown, 1000);
