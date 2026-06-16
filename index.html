@@ -260,11 +260,11 @@
     if (state.dodges === 5) btn.textContent = "Nope.";
     else if (state.dodges === 9) btn.textContent = "Still nope.";
     else if (state.dodges === 14) btn.textContent = "You're persistent…";
-    else if (state.dodges >= 18 && !rewardShown) {
+    else if (state.dodges >= 25 && !rewardShown) {
       btn.textContent = "Okay, okay! Fine.";
     }
 
-    if (state.dodges >= 20 && !rewardShown) winReward();
+    if (state.dodges >= 27 && !rewardShown) winReward();
   }
 
   // dodge on hover (desktop) and on touchstart (mobile)
