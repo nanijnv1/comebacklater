@@ -183,15 +183,18 @@
   "use strict";
 
   /* ---------- persistent state ---------- */
-  var KEY = "cbl-state-v1";
+  // visits persist across sessions (localStorage); dodges reset each session (sessionStorage)
+  var VKEY = "cbl-visits-v1";
+  var DKEY = "cbl-dodges-v1";
   var state = { visits: 0, dodges: 0 };
-  try {
-    var saved = JSON.parse(localStorage.getItem(KEY) || "null");
-    if (saved && typeof saved === "object") state = Object.assign(state, saved);
-  } catch (e) {}
+  try { state.visits = parseInt(localStorage.getItem(VKEY) || "0", 10) || 0; } catch (e) {}
+  try { state.dodges = parseInt(sessionStorage.getItem(DKEY) || "0", 10) || 0; } catch (e) {}
   state.visits += 1;
   save();
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+  function save() {
+    try { localStorage.setItem(VKEY, String(state.visits)); } catch (e) {}
+    try { sessionStorage.setItem(DKEY, String(state.dodges)); } catch (e) {}
+  }
 
   /* ---------- excuses ---------- */
   var excuses = [
@@ -263,11 +266,17 @@
   var btn = document.getElementById("enterBtn");
   var row = btn.parentElement;
   var rewardShown = false;
+  var caught = false; // once true, the button stops running and becomes clickable
 
   function dodge() {
+    if (caught) return; // it surrendered — let the click through
     state.dodges += 1;
     save();
     renderStats();
+
+    // after 27 dodges it gives up: stop running, stay put, become clickable
+    if (state.dodges >= 27) { surrender(); return; }
+
     // capture current center BEFORE switching to fixed positioning
     var prev = btn.getBoundingClientRect();
     var pcx = prev.left + prev.width / 2;
@@ -300,18 +309,34 @@
     else if (state.dodges === 14) btn.textContent = "You're persistent…";
     else if (state.dodges === 17) btn.textContent = "Why are we like this.";
     else if (state.dodges === 21) btn.textContent = "Respect the hustle, honestly.";
-    else if (state.dodges >= 25 && !rewardShown) {
-      btn.textContent = "Okay, okay! Fine.";
+    else if (state.dodges >= 24) {
+      btn.textContent = "Okay, okay! Almost…";
     }
+  }
 
-    if (state.dodges >= 27 && !rewardShown) winReward();
+  // the button gives up: stop dodging, plant it in the middle, make it clickable
+  function surrender() {
+    caught = true;
+    btn.classList.add("runaway"); // keep fixed positioning so we can center it
+    var bw = btn.offsetWidth, bh = btn.offsetHeight;
+    btn.style.left = (window.innerWidth / 2 - bw / 2) + "px";
+    btn.style.top = (window.innerHeight / 2 - bh / 2) + "px";
+    btn.style.background = "var(--ok)";
+    btn.textContent = "Fine, you can. →";
   }
 
   // dodge on hover (desktop) and on touchstart (mobile)
   btn.addEventListener("mouseenter", dodge);
-  btn.addEventListener("touchstart", function (e) { e.preventDefault(); dodge(); }, { passive: false });
-  // if they somehow click it, also count + maybe reward
-  btn.addEventListener("click", function () { dodge(); });
+  btn.addEventListener("touchstart", function (e) {
+    if (caught) return;           // let the tap become a real click
+    e.preventDefault();
+    dodge();
+  }, { passive: false });
+  // clicking only works once it has surrendered; otherwise it just dodges
+  btn.addEventListener("click", function () {
+    if (caught) winReward();
+    else dodge();
+  });
 
   function winReward() {
     rewardShown = true;
