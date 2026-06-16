@@ -183,17 +183,15 @@
   "use strict";
 
   /* ---------- persistent state ---------- */
-  // visits persist across sessions (localStorage); dodges reset each session (sessionStorage)
+  // visits persist across sessions (localStorage); dodges live in memory only,
+  // so every reload counts as a fresh session and resets the chase to 0.
   var VKEY = "cbl-visits-v1";
-  var DKEY = "cbl-dodges-v1";
   var state = { visits: 0, dodges: 0 };
   try { state.visits = parseInt(localStorage.getItem(VKEY) || "0", 10) || 0; } catch (e) {}
-  try { state.dodges = parseInt(sessionStorage.getItem(DKEY) || "0", 10) || 0; } catch (e) {}
   state.visits += 1;
   save();
   function save() {
     try { localStorage.setItem(VKEY, String(state.visits)); } catch (e) {}
-    try { sessionStorage.setItem(DKEY, String(state.dodges)); } catch (e) {}
   }
 
   /* ---------- excuses ---------- */
