@@ -94,7 +94,12 @@
   button:hover { background: #fff; }
   button:active { transform: scale(.96); }
   #enterBtn { position: absolute; left: 50%; top: 0; transform: translateX(-50%); }
-  #enterBtn.runaway { transition: left .25s cubic-bezier(.34,1.56,.64,1), top .25s cubic-bezier(.34,1.56,.64,1); }
+  #enterBtn.runaway {
+    position: fixed;
+    z-index: 6;
+    transform: none;
+    transition: left .3s cubic-bezier(.34,1.56,.64,1), top .3s cubic-bezier(.34,1.56,.64,1);
+  }
   .stats {
     color: var(--muted);
     font-size: 14px;
@@ -263,14 +268,28 @@
     state.dodges += 1;
     save();
     renderStats();
+    // capture current center BEFORE switching to fixed positioning
+    var prev = btn.getBoundingClientRect();
+    var pcx = prev.left + prev.width / 2;
+    var pcy = prev.top + prev.height / 2;
+
     btn.classList.add("runaway");
-    var rowRect = row.getBoundingClientRect();
-    var maxX = Math.max(0, rowRect.width - btn.offsetWidth);
-    var x = Math.random() * maxX;
-    // also let it jump a little vertically within a safe band
-    var y = (Math.random() - 0.5) * 40;
+
+    // jump anywhere in the viewport, with a little edge padding
+    var pad = 14;
+    var bw = btn.offsetWidth, bh = btn.offsetHeight;
+    var maxX = Math.max(pad, window.innerWidth - bw - pad);
+    var maxY = Math.max(pad, window.innerHeight - bh - pad);
+    // require a big leap away from where it just was
+    var minLeap = Math.min(window.innerWidth, window.innerHeight) * 0.5;
+    var x, y, tries = 0;
+    do {
+      x = pad + Math.random() * (maxX - pad);
+      y = pad + Math.random() * (maxY - pad);
+      tries++;
+    } while (Math.hypot((x + bw / 2) - pcx, (y + bh / 2) - pcy) < minLeap && tries < 12);
+
     btn.style.left = x + "px";
-    btn.style.transform = "translateX(0)";
     btn.style.top = y + "px";
 
     if (state.dodges === 3) btn.textContent = "Missed me.";
