@@ -201,7 +201,23 @@
     "Someone deleted the production database. We're calling it a feature.",
     "We're waiting for the vibes to be exactly right.",
     "The intern who knew the password graduated.",
-    "Technically the internet is ready. We are not."
+    "Technically the internet is ready. We are not.",
+    "We're A/B testing whether anyone notices there's no site.",
+    "The roadmap is finished. We just can't find the road.",
+    "Our CEO said 'ship it' and we have not seen them since.",
+    "We're blocked on a meeting about scheduling the meeting.",
+    "It works on my machine. My machine is also unavailable.",
+    "The site is in beta. Beta stands for 'be there… eventually.'",
+    "We ran out of semicolons. Procurement is on it.",
+    "Rome wasn't built in a day, and neither was this. Or at all.",
+    "We pivoted to a startup that builds 'come back later' pages.",
+    "The frontend and backend are not currently on speaking terms.",
+    "We're waiting for the cloud to clear up.",
+    "Patience is a feature. We shipped a lot of it.",
+    "Our designer is still choosing between two identical shades of grey.",
+    "404: Motivation not found.",
+    "We outsourced the launch to future us. Future us is slacking.",
+    "Good things come to those who wait. This is neither, but wait anyway."
   ];
   var excuseEl = document.getElementById("excuse");
   var ei = 0;
@@ -257,9 +273,14 @@
     btn.style.transform = "translateX(0)";
     btn.style.top = y + "px";
 
-    if (state.dodges === 5) btn.textContent = "Nope.";
+    if (state.dodges === 3) btn.textContent = "Missed me.";
+    else if (state.dodges === 5) btn.textContent = "Nope.";
+    else if (state.dodges === 7) btn.textContent = "Too slow!";
     else if (state.dodges === 9) btn.textContent = "Still nope.";
+    else if (state.dodges === 11) btn.textContent = "Catch me if you can.";
     else if (state.dodges === 14) btn.textContent = "You're persistent…";
+    else if (state.dodges === 17) btn.textContent = "Why are we like this.";
+    else if (state.dodges === 21) btn.textContent = "Respect the hustle, honestly.";
     else if (state.dodges >= 25 && !rewardShown) {
       btn.textContent = "Okay, okay! Fine.";
     }
