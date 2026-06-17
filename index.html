@@ -106,19 +106,6 @@
     line-height: 1.6;
   }
   .stats b { color: var(--fg); }
-  .reward {
-    margin-top: 26px;
-    padding: 20px;
-    border: 1px dashed #3a3a52;
-    border-radius: 16px;
-    background: linear-gradient(180deg, rgba(93,255,160,.06), transparent);
-    display: none;
-  }
-  .reward.show { display: block; animation: pop .4s ease; }
-  .reward h2 { color: var(--ok); font-size: 20px; margin-bottom: 8px; }
-  .reward p { color: var(--muted); font-size: 15px; }
-  .reward code { color: var(--ok); background: #11221a; padding: 2px 8px; border-radius: 6px; }
-  @keyframes pop { from { transform: scale(.8); opacity: 0 } to { transform: scale(1); opacity: 1 } }
   footer {
     position: fixed;
     bottom: 16px;
@@ -158,15 +145,62 @@
     from { transform: translateY(110vh) rotate(0deg); }
     to   { transform: translateY(-20vh) rotate(360deg); }
   }
-  .confetti {
+  /* console easter-egg reveal */
+  #eggBanner {
     position: fixed;
-    top: -10px;
-    width: 10px; height: 14px;
-    z-index: 5;
-    pointer-events: none;
-    will-change: transform;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(8,8,14,.72);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    transition: opacity .3s ease;
+  }
+  #eggBanner.show { opacity: 1; }
+  #eggBanner .egg-card {
+    max-width: 440px;
+    width: 100%;
+    background: var(--bg2);
+    border: 1px solid #2c2c40;
+    border-radius: 20px;
+    padding: 30px 26px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.55);
+    transform: scale(.85) translateY(10px);
+    transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+  }
+  #eggBanner.show .egg-card { transform: scale(1) translateY(0); }
+  #eggBanner .egg-emoji { font-size: 40px; margin-bottom: 8px; }
+  #eggBanner h2 {
+    font-size: 26px;
+    margin-bottom: 12px;
+    background: linear-gradient(120deg, var(--ok), var(--accent2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  #eggBanner p { color: var(--muted); font-size: 15px; line-height: 1.6; }
+  #eggBanner .egg-respect { margin-top: 14px; color: var(--fg); }
+  #eggBanner .egg-respect b { color: var(--accent2); }
+  #eggBanner .egg-code {
+    margin-top: 14px;
+    font-family: ui-monospace, monospace;
+    letter-spacing: .08em;
+    color: var(--ok);
+    background: #11221a;
+    border-radius: 8px;
+    padding: 8px 12px;
+    display: inline-block;
+  }
+  #eggBanner .egg-close {
+    margin-top: 22px;
+    font-size: 15px;
+    padding: 12px 24px;
   }
   @media (prefers-reduced-motion: reduce) {
+    #eggBanner, #eggBanner .egg-card { transition: none; }
     #enterBtn.runaway { transition: none; }
     .floaty { animation: none; }
   }
@@ -185,12 +219,6 @@
     </div>
 
     <div class="stats" id="stats"></div>
-
-    <div class="reward" id="reward">
-      <h2>🏆 Fine. You win.</h2>
-      <p>Your reward for relentless persistence: a coupon for nothing, redeemable never.</p>
-      <p style="margin-top:10px">Code: <code id="rewardCode">PATIENCE-IS-A-VIRTUE</code></p>
-    </div>
   </div>
 
   <footer>comebacklater.in — <a id="resetLink" href="#">reset my shame</a><br><span class="powered">⚡ powered by <span class="brand">Rogue Engineer</span><sup>®</sup></span></footer>
@@ -280,17 +308,34 @@
   /* ---------- runaway button ---------- */
   var btn = document.getElementById("enterBtn");
   var row = btn.parentElement;
-  var rewardShown = false;
-  var caught = false; // once true, the button stops running and becomes clickable
+
+  // taunts shown every 5 dodges, picked at random — the chase never ends
+  var taunts = [
+    "Missed me.",
+    "Nope.",
+    "Too slow!",
+    "Still nope.",
+    "Catch me if you can.",
+    "You're persistent…",
+    "Why are we like this.",
+    "Respect the hustle, honestly.",
+    "Not today.",
+    "Almost! …no.",
+    "Keep dreaming.",
+    "This is my cardio.",
+    "You'll tire before I do.",
+    "Forever, baby."
+  ];
 
   function dodge() {
-    if (caught) return; // it surrendered — let the click through
     state.dodges += 1;
     save();
     renderStats();
 
-    // after 27 dodges it gives up: stop running, stay put, become clickable
-    if (state.dodges >= 27) { surrender(); return; }
+    // every 5th dodge, taunt with a random message
+    if (state.dodges % 5 === 0) {
+      btn.textContent = taunts[Math.floor(Math.random() * taunts.length)];
+    }
 
     // capture current center BEFORE switching to fixed positioning
     var prev = btn.getBoundingClientRect();
@@ -315,52 +360,18 @@
 
     btn.style.left = x + "px";
     btn.style.top = y + "px";
-
-    if (state.dodges === 3) btn.textContent = "Missed me.";
-    else if (state.dodges === 5) btn.textContent = "Nope.";
-    else if (state.dodges === 7) btn.textContent = "Too slow!";
-    else if (state.dodges === 9) btn.textContent = "Still nope.";
-    else if (state.dodges === 11) btn.textContent = "Catch me if you can.";
-    else if (state.dodges === 14) btn.textContent = "You're persistent…";
-    else if (state.dodges === 17) btn.textContent = "Why are we like this.";
-    else if (state.dodges === 21) btn.textContent = "Respect the hustle, honestly.";
-    else if (state.dodges >= 24) {
-      btn.textContent = "Okay, okay! Almost…";
-    }
   }
 
-  // the button gives up: stop dodging, plant it in the middle, make it clickable
-  function surrender() {
-    caught = true;
-    btn.classList.add("runaway"); // keep fixed positioning so we can center it
-    var bw = btn.offsetWidth, bh = btn.offsetHeight;
-    btn.style.left = (window.innerWidth / 2 - bw / 2) + "px";
-    btn.style.top = (window.innerHeight / 2 - bh / 2) + "px";
-    btn.style.background = "var(--ok)";
-    btn.textContent = "Fine, you can. →";
-  }
-
-  // dodge on hover (desktop) and on touchstart (mobile)
+  // dodge on hover (desktop), touch (mobile), and any click — it never lets go
   btn.addEventListener("mouseenter", dodge);
   btn.addEventListener("touchstart", function (e) {
-    if (caught) return;           // let the tap become a real click
     e.preventDefault();
     dodge();
   }, { passive: false });
-  // clicking only works once it has surrendered; otherwise it just dodges
-  btn.addEventListener("click", function () {
-    if (caught) winReward();
-    else dodge();
+  btn.addEventListener("click", function (e) {
+    e.preventDefault();
+    dodge();
   });
-
-  function winReward() {
-    rewardShown = true;
-    var r = document.getElementById("reward");
-    r.classList.add("show");
-    btn.style.display = "none";
-    document.getElementById("countdown").innerHTML = "Ready in <b>just kidding</b>";
-    confettiBurst();
-  }
 
   /* ---------- stats ---------- */
   var statsEl = document.getElementById("stats");
@@ -395,30 +406,56 @@
     })(i);
   }
 
-  /* ---------- confetti (no deps) ---------- */
-  function confettiBurst() {
-    var colors = ["#ff5d73", "#5dc2ff", "#5dffa0", "#ffd75d", "#c98bff"];
-    for (var i = 0; i < 80; i++) {
-      (function () {
-        var c = document.createElement("div");
-        c.className = "confetti";
-        c.style.left = Math.random() * 100 + "vw";
-        c.style.background = colors[Math.floor(Math.random() * colors.length)];
-        c.style.transform = "rotate(" + Math.random() * 360 + "deg)";
-        document.body.appendChild(c);
-        var fall = 2000 + Math.random() * 2000;
-        var drift = (Math.random() - 0.5) * 300;
-        var anim = c.animate(
-          [
-            { transform: "translate(0,0) rotate(0deg)", opacity: 1 },
-            { transform: "translate(" + drift + "px, 100vh) rotate(720deg)", opacity: 1 }
-          ],
-          { duration: fall, easing: "ease-in" }
-        );
-        anim.onfinish = function () { c.remove(); };
-      })();
-    }
+  /* ---------- console-only easter egg ---------- */
+  // Invisible on the page — you can only find this by opening devtools.
+  // The hint printed below is scrambled; figuring out how to read it is the puzzle.
+  // Decode it to learn the magic words, then run them to unlock the funny message.
+  var EGG_SECRET = "the-button-was-the-friends-we-made-along-the-way";
+  var EGG_HINT = btoa('knock, and it shall open. the password is:  ' + EGG_SECRET);
+
+  console.log("%c👀 Pssst… you opened the console.", "font-size:20px;font-weight:800;color:#ff5d73");
+  console.log("%cThere's a secret in here somewhere. Can you read this?", "color:#5dc2ff;font-size:13px");
+  console.log("%c    " + EGG_HINT, "color:#5dffa0;font-size:13px;font-family:monospace");
+
+  function revealEggUi() {
+    if (document.getElementById("eggBanner")) return; // only once
+    var el = document.createElement("div");
+    el.id = "eggBanner";
+    el.innerHTML =
+      "<div class='egg-card'>" +
+        "<div class='egg-emoji'>🕵️🎉</div>" +
+        "<h2>Secret unlocked.</h2>" +
+        "<p>You decoded the console, outsmarted a button you could never catch, " +
+        "and got rewarded with… this little box. Truly, you have too much time.</p>" +
+        "<p class='egg-respect'>🫡 <b>Rogue Engineer</b> respects and appreciates you.</p>" +
+        "<p class='egg-code'>CONSOLE-COWBOY-9000</p>" +
+        "<button class='egg-close' id='eggClose'>back to the chase →</button>" +
+      "</div>";
+    document.body.appendChild(el);
+    requestAnimationFrame(function () { el.classList.add("show"); });
+    document.getElementById("eggClose").addEventListener("click", function () {
+      el.classList.remove("show");
+      setTimeout(function () { el.remove(); }, 300);
+    });
   }
+
+  window.knock = function (code) {
+    if (code === EGG_SECRET) {
+      console.log("%c🎉  ACCESS GRANTED  🎉", "font-size:22px;font-weight:800;color:#5dffa0;text-shadow:0 0 8px #5dffa0");
+      console.log(
+        "%cThe secret site is… this one. You were here the whole time.\n" +
+        "Your reward for outsmarting a button you could never catch:\n" +
+        "the warm glow of productively wasted time. 🏆\n" +
+        "🫡 Rogue Engineer respects and appreciates you.\n" +
+        "Coupon (redeemable never): CONSOLE-COWBOY-9000",
+        "color:#f4f4f8;font-size:14px;line-height:1.7"
+      );
+      revealEggUi();
+      return "🤝 we both know you'll go chase that button again.";
+    }
+    console.log("%c❌ Nope. Wrong magic words. Decode it again, detective. 🕵️", "color:#ff5d73;font-size:13px");
+    return "try again";
+  };
 })();
 </script>
 </body>
